@@ -1,0 +1,54 @@
+<header>
+    <div class="logo">
+        <span><%= title %></span>
+    </div>
+    
+    <div class="login">
+        <button class="denglu">登录</button>
+        <button class="zhuche">注册</button>
+    </div>
+    <div class="logout">
+        <span class="nickname">二狗子</span>
+        <div class="img-box">
+            <img src="/images/ergou.jpg">
+        </div>
+        <button id="exit">注销</button>
+    </div>
+</header>
+<script type="text/javascript">
+    window.onload = function(){
+        checkLogin();
+        $('#exit')[0].onclick = function(){
+            exit();
+        };
+        $(".zhuche").on("click",function(){
+            window.location.href = "/zhuche"
+        });
+        $(".denglu").on("click",function(){
+            window.location.href = "/denglu"
+        });
+    };
+    //判断是否登录
+    function checkLogin() {
+        let userinfo = $.cookie('userinfo');
+        if(userinfo){
+           userinfo = JSON.parse(userinfo);
+            if(userinfo._id){
+                $('.login').hide();
+                $('.logout').show();
+                //改昵称和头像
+                $('.logout').find('.nickname').html(userinfo.nickname);
+                $('.logout').find('img').prop('src',userinfo.headImg);
+            }else{
+                $('.login').show();
+                $('.logout').hide();
+            };
+        };
+    };
+
+    //注销函数
+    function exit() {
+        $.cookie('userinfo',null,{expires:-1});
+        location.reload();
+    };
+</script>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/stylesheets/index.css" />
+    <link rel="stylesheet" type="text/css" href='stylesheets/message.css'>
+  </head>
+  <body>
+       <%- include("./head/head.ejs")%>
+      <p>
+        <a href="/">回到首页</a>
+        <a href="/fatielist">查看列表</a>
+      </p>
+      <form id="form">
+        <div class="form-group">
+          <label for="">标题</label>
+          <input type="text" class="form-control" id="title">
+        </div>
+        <div class="form-group">
+          <label for="">内容</label>
+          <textarea class="form-control" rows="15" id="content"></textarea>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-success" id="fabu">发布</button>
+          <button type="reset" class="btn btn-default">重置</button>
+        </div>
+      </form>
+
+      <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+      <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+      <script type="text/javascript" src="/javascripts/cookie.js"></script>
+      <script type="text/javascript" src="javascripts/message.min.js"></script>
+  </body>
+  <script type="text/javascript">
+    window.onload = function(){
+        checkLogin();
+        $('#exit')[0].onclick = function(){
+            exit();
+        };
+        $(".zhuche").on("click",function(){
+            window.location.href = "/zhuche"
+        });
+        $(".denglu").on("click",function(){
+            window.location.href = "/denglu"
+        });
+    };
+    //阻止默认事件
+    $("#form").submit((e)=>{
+      e.preventDefault();
+    });
+
+    $("#fabu").on('click', function (){
+        let userinfo = JSON.parse($.cookie('userinfo') || '{}')
+        if(!userinfo._id){
+        //如果没有登陆
+            $.message({
+                message:"请登陆后操作",
+                type:'warning',
+                time:1000
+            });
+            //跳转到登录
+            setTimeout(() => {
+                window.location.href='/denglu'
+            }, 1400);
+        }else{
+            if($('#title').val() !== "" && $('#content').val() !== ""){
+                let title = $('#title').val();
+                let content = $('#content').val();
+                //发送帖子数据
+                $.ajax({
+                    url:'/api/v1/fatie',
+                    type:'post',
+                    data:{
+                        title,
+                        content,
+                        author_id:userinfo._id,
+                        author_nick:userinfo.nickname
+                    },
+                    success:function(result){
+                        if(result.err === 500){
+                            $.message({
+                                message:"发帖失败",
+                                type:'error',
+                                time:1000
+                            });
+                        }else{
+                            $.message({
+                                message:"发帖成功",
+                                type:'success',
+                                time:1000
+                            });
+                        };
+                    }
+                });
+                //发送后重置数据
+                $('#title').val("") 
+                $('#content').val("")
+            }else{
+                 $.message({
+                    message:"数据不能为空",
+                    type:'warning',
+                    time:1000
+                });
+            };
+        };
+    });
+    
+    //判断是否登录
+    function checkLogin() {
+        let userinfo = $.cookie('userinfo');
+        if(userinfo){
+           userinfo = JSON.parse(userinfo);
+            if(userinfo._id){
+                $('.login').hide();
+                $('.logout').show();
+                //改昵称和头像
+                $('.logout').find('.nickname').html(userinfo.nickname);
+                $('.logout').find('img').prop('src',userinfo.headImg);
+            }else{
+                $('.login').show();
+                $('.logout').hide();
+            };
+        };
+    };
+
+    //注销函数
+    function exit() {
+        $.cookie('userinfo',null,{expires:-1});
+        location.reload();
+    };
+  </script>
+</html>
+
+
+
+

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/stylesheets/index.css" />
+    <link rel="stylesheet" type="text/css" href='stylesheets/message.css'>
+  </head>
+  <body>
+       <%- include("./head/head.ejs")%>
+      <p>
+        <a href="/">回到首页</a>
+        <a href="/fatie">去发帖</a>
+      </p>
+      <ul class="ul">
+        
+      </ul>
+      <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+      <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+      <script type="text/javascript" src="/javascripts/cookie.js"></script>
+      <script type="text/javascript" src="javascripts/message.min.js"></script>
+  </body>
+  <script type="text/javascript">
+    window.onload = function(){
+        checkLogin();
+        $('#exit')[0].onclick = function(){
+            exit();
+        };
+        $(".zhuche").on("click",function(){
+            window.location.href = "/zhuche"
+        });
+        $(".denglu").on("click",function(){
+            window.location.href = "/denglu"
+        });
+    };
+    
+    //判断是否登录
+    function checkLogin() {
+        let userinfo = $.cookie('userinfo');
+        if(userinfo){
+           userinfo = JSON.parse(userinfo);
+            if(userinfo._id){
+                $('.login').hide();
+                $('.logout').show();
+                //改昵称和头像
+                $('.logout').find('.nickname').html(userinfo.nickname);
+                $('.logout').find('img').prop('src',userinfo.headImg);
+            }else{
+                $('.login').show();
+                $('.logout').hide();
+            };
+        };
+    };
+
+    //注销函数
+    function exit() {
+        $.cookie('userinfo',null,{expires:-1});
+        location.reload();
+    };
+
+    $.ajax({
+        url:'api/v1/fatielist',
+        type:'post',
+        success:function(data){
+            var strli = "";
+            for(var n=0,len=data.length;n<len;n++){
+                strli += `<li>${data[n].title}</li>`
+            };
+            $('.ul').html(strli)
+        }
+    });
+  </script>
+</html>
+
+
+
+
